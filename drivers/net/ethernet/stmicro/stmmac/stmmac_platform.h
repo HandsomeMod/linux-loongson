@@ -10,6 +10,9 @@
 #define __STMMAC_PLATFORM_H__
 
 #include "stmmac.h"
+int stmmac_dt_phy(struct plat_stmmacenet_data *plat,
+			 struct device_node *np, struct device *dev);
+int stmmac_of_get_mac_mode(struct device_node *np);
 
 struct plat_stmmacenet_data *
 stmmac_probe_config_dt(struct platform_device *pdev, const char **mac);
