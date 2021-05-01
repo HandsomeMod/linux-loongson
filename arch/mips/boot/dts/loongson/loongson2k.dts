@@ -248,6 +248,7 @@
 				interrupt-parent = <&liointc0>;
 			};
 
+
 			sata@8,0 {
 				compatible = "pci0014,7a08.0",
 						   "pci0014,7a08",
