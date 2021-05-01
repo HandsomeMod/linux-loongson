@@ -25,6 +25,7 @@
 #include "hda_auto_parser.h"
 #include "hda_jack.h"
 #include "hda_generic.h"
+#include "hda_controller.h"
 
 /* keep halting ALC5505 DSP, for power saving */
 #define HALT_REALTEK_ALC5505
@@ -294,6 +295,13 @@ static void alc_fixup_micmute_led(struct hda_codec *codec,
 {
 	if (action == HDA_FIXUP_ACT_PROBE)
 		snd_hda_gen_add_micmute_led_cdev(codec, NULL);
+}
+
+int has_loongson_workaround(struct hda_codec *codec)
+{
+	struct azx *chip = bus_to_azx(&codec->bus->core);
+
+	return chip->driver_caps & AZX_DCAPS_LS_HDA_WORKAROUND;
 }
 
 /*
@@ -629,10 +637,10 @@ static int alc_auto_parse_customize_define(struct hda_codec *codec)
 		goto do_sku;
 	}
 
-	if (!codec->bus->pci)
+	if (!codec->bus->pci && !has_loongson_workaround(codec))
 		return -1;
 	ass = codec->core.subsystem_id & 0xffff;
-	if (ass != codec->bus->pci->subsystem_device && (ass & 1))
+	if (codec->bus->pci && ass != codec->bus->pci->subsystem_device && (ass & 1))
 		goto do_sku;
 
 	nid = 0x1d;
@@ -3845,6 +3853,10 @@ static int alc269_resume(struct hda_codec *codec)
 		msleep(150);
 	}
 
+	if (!spec->no_depop_delay) {
+		msleep(150);
+	}
+
 	codec->patch_ops.init(codec);
 
 	if (spec->codec_variant == ALC269_TYPE_ALC269VB)
@@ -6412,6 +6424,7 @@ enum {
 	ALC269_FIXUP_CZC_B20,
 	ALC269_FIXUP_CZC_TMI,
 	ALC269_FIXUP_CZC_L101,
+	ALC269_FIXUP_LS3A7A,
 	ALC269_FIXUP_LEMOTE_A1802,
 	ALC269_FIXUP_LEMOTE_A190X,
 	ALC256_FIXUP_INTEL_NUC8_RUGGED,
@@ -7901,6 +7914,14 @@ static const struct hda_fixup alc269_fixups[] = {
 		.chained = true,
 		.chain_id = ALC269_FIXUP_HEADSET_MODE_NO_HP_MIC
 	},
+	[ALC269_FIXUP_LS3A7A] = {
+		.type = HDA_FIXUP_PINS,
+		.v.pins = (const struct hda_pintbl[]) {
+			{ 0x1b, 0x02214c40 }, /* Front Mic */
+			{ 0x15, 0x01014030 }, /* Rear Mic */
+			{ }
+		},
+	},
 };
 
 static const struct snd_pci_quirk alc269_fixup_tbl[] = {
@@ -8271,6 +8292,7 @@ static const struct snd_pci_quirk alc269_fixup_tbl[] = {
 	SND_PCI_QUIRK(0x1b35, 0x1235, "CZC B20", ALC269_FIXUP_CZC_B20),
 	SND_PCI_QUIRK(0x1b35, 0x1236, "CZC TMI", ALC269_FIXUP_CZC_TMI),
 	SND_PCI_QUIRK(0x1b35, 0x1237, "CZC L101", ALC269_FIXUP_CZC_L101),
+	SND_PCI_QUIRK(0x10ec, 0x0269, "ls3a7a", ALC269_FIXUP_LS3A7A),
 	SND_PCI_QUIRK(0x1b7d, 0xa831, "Ordissimo EVE2 ", ALC269VB_FIXUP_ORDISSIMO_EVE2), /* Also known as Malata PC-B1303 */
 	SND_PCI_QUIRK(0x1d72, 0x1602, "RedmiBook", ALC255_FIXUP_XIAOMI_HEADSET_MIC),
 	SND_PCI_QUIRK(0x1d72, 0x1701, "XiaomiNotebook Pro", ALC298_FIXUP_DELL1_MIC_NO_PRESENCE),
@@ -9583,8 +9605,8 @@ enum {
 	ALC662_FIXUP_LED_GPIO1,
 	ALC662_FIXUP_IDEAPAD,
 	ALC272_FIXUP_MARIO,
-	ALC662_FIXUP_CZC_ET26,
 	ALC662_FIXUP_CZC_P10T,
+	ALC662_FIXUP_CZC_ET26,
 	ALC662_FIXUP_SKU_IGNORE,
 	ALC662_FIXUP_HP_RP5800,
 	ALC662_FIXUP_ASUS_MODE1,

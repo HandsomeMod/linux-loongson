@@ -1,0 +1,10 @@
+--- sound/hda/hdac_controller.c
++++ sound/hda/hdac_controller.c
+@@ -9,6 +9,7 @@
+ #include <sound/core.h>
+ #include <sound/hdaudio.h>
+ #include <sound/hda_register.h>
++#include "../pci/hda/hda_controller.h"
+ 
+ /* clear CORB read pointer properly */
+ static void azx_clear_corbrp(struct hdac_bus *bus)
