@@ -148,16 +148,16 @@ void __init *get_builtin_dtb(void)
         fdt = __dtb_loongson2k_begin;
 
     if (cpu == CPU_LS3_4CORES && pch == PCH_RS780E)
-        fdt = __dtb_loongson3_4core_rs780e_begin;
+        fdt = __dtb_loongson64c_4core_rs780e_begin;
 
     if (cpu == CPU_LS3_8CORES && pch == PCH_RS780E)
-        fdt = __dtb_loongson3_8core_rs780e_begin;
+        fdt = __dtb_loongson64c_8core_rs780e_begin;
     
     if (cpu == CPU_LS3_4CORES && pch == PCH_LS7A)
-        fdt = __dtb_loongson3_4core_ls7a_begin;
+        fdt = __dtb_loongson64g_4core_ls7a_begin;
 
     if (cpu == CPU_LS3_R4 && pch == PCH_LS7A)
-        fdt = __dtb_loongson3_r4_ls7a_begin;
+        fdt = __dtb_loongson64g_4core_ls7a_begin;
 
     if (!fdt) {
         pr_err("Builtin-dtbs: No matching model\n");

@@ -12,7 +12,7 @@
  */
 
 #include <asm/addrspace.h>
-#include <linux/dma-contiguous.h>
+#include <linux/dma-map-ops.h>
 #include <linux/dma-mapping.h>
 #include <linux/vmalloc.h>
 #include <linux/console.h>
